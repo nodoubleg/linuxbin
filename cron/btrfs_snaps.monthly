@@ -1,0 +1,3 @@
+#!/bin/bash
+btrfs-snap / monthly 3
+btrfs-snap /home monthly 3

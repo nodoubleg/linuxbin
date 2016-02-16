@@ -1,0 +1,3 @@
+#!/bin/bash
+btrfs-snap / weekly 5
+btrfs-snap /home weekly 5
