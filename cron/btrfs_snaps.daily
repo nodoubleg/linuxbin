@@ -1,3 +1,3 @@
 #!/bin/bash
-btrfs-snap / daily 7
-btrfs-snap /home daily 7
+btrfs-snap -r / daily 7
+btrfs-snap -r /home daily 7
