@@ -1,0 +1,3 @@
+#!/bin/bash
+# mimic OS X pbcopy
+xsel -i --clipboard
