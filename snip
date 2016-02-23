@@ -1,12 +1,11 @@
-#!/bin/bash
+#!/bin/zsh
 # grabs a line from a snippets file formatted as such:
-
 # key#value
 
 # and places it into the standard copy/paste clipboard
 
 snipfile="/home/gmason/snippets"
 
-snip=$(grep $1 $snipfile | cut -d '#' -f 3)
-echo $snip
-echo -n $snip | xsel -i --clipboard
+grep $1 $snipfile | cut -d '#' -f 3 | read snipline
+echo $snipline | cut -d '#' -f 3
+echo -n $snipline | cut -d '#' -f 3 | xsel -i --clipboard
