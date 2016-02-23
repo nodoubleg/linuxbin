@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 sudo cp *_hourly /etc/cron.hourly
 sudo cp *_daily /etc/cron.daily
 sudo cp *_weekly /etc/cron.weekly
