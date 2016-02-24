@@ -1,0 +1,3 @@
+#!/bin/sh
+# yes, we overwrite the log. No, I don't care.
+apt-get autoremove -y > /var/log/apt/nodoubleg_apt-get_autoremove.log 2>&1
