@@ -1,0 +1,75 @@
+#!/bin/bash
+# EOD automation for nodoubleg.
+# No need for markdown notes, as my notes on are *paper* !
+# So, we're just doing all this shit in bash, because https://www.youtube.com/watch?v=Qy-Y3HJNU_s
+
+myname=$(getent passwd $LOGNAME | cut -d: -f5 | cut -d, -f1)
+subject="`date '+%Y-%m-%d (%A)'` EOD Report for $myname"
+#TODO: fix this to not need a temp file
+tmpfile=/tmp/eod-$$-tmpfile
+
+# first, let's fetch some victory! 
+# due to UTF8, these lines may not display properly in an editor.
+getvictory() {
+w3m https://portal.admin.canonical.com/fail -dump | head -n1 | grep -qi victory
+}
+if getvictory
+then
+  victory='😄' 
+else
+  echo 'FAIL! Fix this fail:'
+  w3m https://portal.admin.canonical.com/fail -dump
+  w3m https://portal.admin.canonical.com/fail -dump_source | gunzip -c | awk -F '"' '/target="_blank">[C,U]/{print $2}'
+  exit 1
+fi  
+
+# Let's scrape some stuff out of myday.
+myday=$(w3m https://portal.admin.canonical.com/myday -dump_source | gunzip -c)
+
+# Just defining template stuff here, because why not.
+SOD_MISC_INTERRUPTS='SOD/Misc stuff:
+Email/IRC:
+==========
+ - 
+ 
+Nagios/Maintenance:
+===================
+ -  
+ 
+Humans/PD/interruptions:
+========================'
+TICKETHEADER='
+ 
+Tickets:
+========'
+PVG="
+EOD Checklist:
+ - PVG 
+  - Incoming RT queue: 
+  - Nagios/Maintenance Work: 
+ - Portal Fail Page: ${victory}
+ - RQ items: "
+BVG="
+EOD Checklist:
+ - BVG 
+	- Nagios/Maintenance Work: 
+ - Portal Fail Page: ${victory}
+ - RQ items: "
+
+# Assemble the body.
+echo "$SOD_MISC_INTERRUPTS" >> $tmpfile
+# Fetching list of mentions in IRC from bouncer.
+ssh gmason@bip.nodoubleg.com 'sudo -u bip bash /home/bip/todays_mentions.sh' >> $tmpfile
+echo "$TICKETHEADER" >> $tmpfile
+# get list of all ticket titles.
+echo "$myday" | grep 'href="https://rt' | awk -F '<|>' '{print $5}' >> $tmpfile
+#TODO: add logic by fetching {W,P,B}VG status from Dashboard.
+echo "$BVG" >> $tmpfile
+echo "$myday" | grep 'Work time logged in RT' -A4 >> $tmpfile
+
+# Email time! finally! woo!
+kmail -s "$subject" --body "`cat $tmpfile`"
+
+
+# Cleanup
+rm $tmpfile
