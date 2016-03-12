@@ -2,6 +2,9 @@
 # EOD automation for nodoubleg.
 # No need for markdown notes, as my notes on are *paper* !
 # So, we're just doing all this shit in bash, because https://www.youtube.com/watch?v=Qy-Y3HJNU_s
+#rcpt='whiskey-reports@greenteam.canonical.com'
+#rcpt='tango-reports@greenteam.canonical.com'
+rcpt='foxtrot-reports@greenteam.canonical.com'
 
 myname=$(getent passwd $LOGNAME | cut -d: -f5 | cut -d, -f1)
 subject="`date '+%Y-%m-%d (%A)'` EOD Report for $myname"
@@ -68,7 +71,7 @@ echo "$BVG" >> $tmpfile
 echo "$myday" | grep 'Work time logged in RT' -A4 >> $tmpfile
 
 # Email time! finally! woo!
-kmail -s "$subject" --body "`cat $tmpfile`"
+kmail -s "$subject" --body "`cat $tmpfile`" $rcpt
 
 
 # Cleanup
