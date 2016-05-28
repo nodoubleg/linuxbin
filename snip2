@@ -1,0 +1,29 @@
+#!/bin/zsh
+# grabs a line from a snippets file formatted as such:
+# key#value
+
+# and places it into the standard copy/paste clipboard
+
+snipfile="/home/gmason/snippets"
+
+zparseopts r=run c=copy \?=help
+
+if [[ -n $help]]
+then
+  echo "Usage:
+$0 <query>  Display and paste matching snip to clipboard.
+$0 -c <query>  Display and paste matching snip to clipboard.
+$0 -r <query>  Display and run the matching snip.
+$0 \? Display this help text.
+"
+
+grep $1 $snipfile | cut -d '#' -f 3 | read snipline
+echo $snipline | cut -d '#' -f 3
+if [[]]
+elif [[ -n $run ]]
+then
+  `echo $snipline | cut -d '#' -f 3`
+elif [[ -n $ ]]
+then
+
+echo -n $snipline | cut -d '#' -f 3 | xsel -i --clipboard

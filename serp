@@ -1,0 +1,52 @@
+#!/bin/bash
+# SE Remote Pipe, to cat or copy files from remote juju units
+
+function usage () {
+    echo "Example usage:"
+    echo 'ser stagingstack-ue error-tracker juju ssh e-t-daisy-app/0 "base64 file" | serp base64-d'
+    echo 'ser stagingstack-ue error-tracker juju ssh e-t-daisy-app/0 "$(serp catz file)" | serp mombin-zcat $(date +%F)/foo.log'
+    echo 'ser stagingstack-ue error-tracker juju ssh e-t-daisy-app/0 "tail -n200 foo.log | gzip -f | base64" | serp mombin-zcat'
+    echo 'ser stagingstack-ue error-tracker juju ssh e-t-daisy-app/0 "$(serp tar-c file)" | serp tar-x'
+    echo 'ser stagingstack-ue error-tracker juju ssh e-t-daisy-app/0 "$(serp tar-c file)" | serp mombin-tar-x'
+}
+
+function tee_stderr () {
+    tee >(grep -e' ' --line-buffered >>/dev/stderr)
+}
+
+function grep_v () { grep -ve' '; }
+
+function clean_typescript () {
+    perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g'
+}
+
+function tar_path () { echo $(dirname $1) $(basename $1); }
+
+
+if [ $# -lt 1 ]; then
+    usage
+    exit
+fi
+
+case "$1" in
+    # for remote end, just echo appropriate command:
+    typescript) echo "cat ${2:-typescript} | clean_typescript | base64";;
+    catz) echo "cat ${2} | gzip -f | base64";;
+    tar-c) echo "tar -c -C $(tar_path $2) | gzip -f | base64";;
+
+    # then run serp locally on other side of pipe to decode correctly
+    base64-d) tee_stderr | grep_v | base64 -id ;;
+    zcat) tee_stderr | grep_v | base64 -id | gzip -d ;;
+    tar-x) tee_stderr | grep_v | base64 -id | tar -xz ;;
+    mombin-tar-x)
+        D=public_html/${2:-$(TZ=UTC date +%F)}
+        tee_stderr | grep_v | \
+        ssh mombin.canonical.com "mkdir -p $D; cd $D; base64 -id | tar -xz" ;;
+    mombin-zcat)
+        D=public_html/${2:-$(TZ=UTC date +%Y%m%d%H%M%S)}
+        tee_stderr | grep_v | \
+        ssh mombin.canonical.com "mkdir -p $(dirname $D); base64 -id | gzip -d > $D"
+        echo "https://private-fileshare.canonical.com/~${USER}/${D##public_html/}" ;;
+
+    *) echo "ERROR, option not supported" ;;
+esac

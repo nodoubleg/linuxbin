@@ -6,6 +6,18 @@
 #rcpt='tango-reports@greenteam.canonical.com'
 rcpt='foxtrot-reports@greenteam.canonical.com'
 
+if [ "$1" == "pvg" ]
+then
+    vg="pvg" 
+elif [ "$1" == "bvg" ]
+then
+    vg="bvg"
+else
+    echo "Usage: $0 <pbg|bvg>"
+    exit 1
+fi
+
+
 myname=$(getent passwd $LOGNAME | cut -d: -f5 | cut -d, -f1)
 subject="`date '+%Y-%m-%d (%A)'` EOD Report for $myname"
 #TODO: fix this to not need a temp file
@@ -31,16 +43,19 @@ myday=$(w3m https://portal.admin.canonical.com/myday -dump_source | gunzip -c)
 
 # Just defining template stuff here, because why not.
 SOD_MISC_INTERRUPTS='SOD/Misc stuff:
-Email/IRC:
-==========
+===============
  - 
  
-Nagios/Maintenance:
-===================
+Maintenance time:
+=================
  -  
  
 Humans/PD/interruptions:
 ========================'
+
+ALERTHEADER='PD Alerts:
+=========='
+
 TICKETHEADER='
  
 Tickets:
@@ -48,14 +63,15 @@ Tickets:
 PVG="
 EOD Checklist:
  - PVG 
-  - Incoming RT queue: 
-  - Nagios/Maintenance Work: 
+   - Incoming RT queue: 
+   - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
 BVG="
 EOD Checklist:
  - BVG 
-	- Nagios/Maintenance Work: 
+   - Incoming RT queue: n/a
+   - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
 
@@ -63,16 +79,34 @@ EOD Checklist:
 echo "$SOD_MISC_INTERRUPTS" >> $tmpfile
 # Fetching list of mentions in IRC from bouncer.
 ssh gmason@bip.nodoubleg.com 'sudo -u bip bash /home/bip/todays_mentions.sh' >> $tmpfile
+# get today's PD alerts.
+echo "$ALERTHEADER" >> $tmpfile
+ssh gmason@bip.nodoubleg.com 'sudo -u bip bash /home/bip/todays_alerts.sh' >> $tmpfile
 echo "$TICKETHEADER" >> $tmpfile
 # get list of all ticket titles.
 echo "$myday" | grep 'href="https://rt' | awk -F '<|>' '{print $5}' >> $tmpfile
 #TODO: add logic by fetching {W,P,B}VG status from Dashboard.
-echo "$BVG" >> $tmpfile
+echo ''
+if [ "$vg" == "pvg" ]
+then
+	echo "$PVG" >> $tmpfile
+elif [ "$vg" == "bvg" ]
+then
+	echo "$BVG" >> $tmpfile
+fi
 echo "$myday" | grep 'Work time logged in RT' -A4 >> $tmpfile
 
 # Email time! finally! woo!
-kmail -s "$subject" --body "`cat $tmpfile`" $rcpt
+#kmail -s "$subject" --body "`cat $tmpfile`" $rcpt
+cat $tmpfile | xsel -i --clipboard
+echo
+echo "body is just in clipboard. get a better email client!"
+echo 
+sylpheed --compose $rcpt "mailto:$rcpt?subject=$subject"
+
 
 
 # Cleanup
 rm $tmpfile
+
+notify-send --urgency=CRITICAL -t 3600000 "DROP TOPICS!"

@@ -1,0 +1,44 @@
+#!/bin/bash
+# launch ephemeral lxc container, then throw it away after logging out.
+# good for quick tests in clean environments
+# works best with a local ubuntu mirror.
+
+# defaults
+IMAGE="ubuntu:x"
+update=0
+pinghost=squid-proxy
+if [[ $# -eq 0 ]]; then
+    echo "Using default image: $IMAGE"
+else
+    if [[ $# -gt 2 ]]; then
+        echo "usage: ephem [flavor] [latest]"
+    elif [[ $# -eq 2 ]]; then
+        IMAGE=$1
+        shift
+    fi
+    if [[ $# -eq 1 ]]; then
+        if [[ ${1}x == "latestx" ]]; then
+            update=1
+            echo "Using latest updates on default image: $IMAGE"
+        elif [[ ${1} != "latestx" ]]; then
+            IMAGE=$1
+        fi
+    fi
+fi
+
+container=$(lxc launch -e $IMAGE -p default -p docker | awk /Starting/'{print $2}')
+echo $container
+echo "Waiting for network..."
+while ! lxc exec $container ls /tmp/wait4dns > /dev/null 2>&1
+do
+    echo "while ! ping -c 1 $pinghost; do sleep 0.2; done 2>&1" | lxc file push - $container/tmp/wait4dns
+done
+if [[ $update -eq 1 ]]; then
+    lxc exec $container /bin/bash /tmp/wait4dns >/dev/null
+    lxc exec $container /usr/bin/apt-get update
+    lxc exec $container /usr/bin/apt-get -- --yes dist-upgrade
+fi
+lxc exec $container /bin/bash -- --login
+wait
+# we really mean ephemeral
+lxc delete -f $container

@@ -1,6 +1,0 @@
-#!/bin/bash
-# yes, we overwrite the log. No, I don't care.
-apt-get update > /var/log/apt/nodoubleg_apt_update 2>&1
-apt-get dist-upgrade -y > /var/log/apt/nodoubleg_apt_dist-upgrade 2>&1
-# TODO: add logic to throw warning when reboot is necessary from recent update
-# zenity --width=700 --height=400 --warning --title='Reboot necessary' --text='<span size="75000">Reboot required!\n\n</span><span size="x-large">Reboot necessary for recent update</span>'  

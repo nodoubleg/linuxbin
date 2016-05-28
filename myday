@@ -1,0 +1,15 @@
+#!/bin/bash
+# Uses w3m to grab portal myday and fail pages,
+# so need to login to portal manually first to get cookies.
+# Format output to be appended to daily report
+
+# parallel runs this under sh/dash, so echo is not what you expect...
+V=' - Portal Fail Page: victory\n'
+F='\n - Portal Fail Page: TRY AGAIN\n'
+
+# call in parallel to speed it up,
+# but sleep the faster one to get ordering right (most of the time)
+parallel -j2 -- \
+"w3m https://portal.admin.canonical.com/fail -dump | head -n1 | grep -qi victory && echo '$V' || echo '$F'" \
+"sleep 2; w3m https://portal.admin.canonical.com/myday -dump | grep 'Work time logged' -A4 "
+

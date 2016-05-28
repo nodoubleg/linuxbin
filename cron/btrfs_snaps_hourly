@@ -1,3 +1,0 @@
-#!/bin/bash
-/usr/local/bin/btrfs-snap -r / hourly 24
-/usr/local/bin/btrfs-snap -r /home hourly 24

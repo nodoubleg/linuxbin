@@ -1,0 +1,32 @@
+#!/bin/bash
+# launch ephemeral lxc container, then throw it away after logging out.
+# good for quick tests in clean environments
+# works best with a local ubuntu mirror.
+
+# defaults
+# We always want updates when it comes to browsers
+IMAGE="ubuntu:x"
+update=1
+container=$(lxc launch -e $IMAGE | awk /Starting/'{print $2}')
+
+echo $container
+echo "Waiting for network..."
+echo 'while ! ping -c 1 archive.ubuntu.com; do sleep 0.2; done 2>&1' | lxc file push - $container/tmp/wait4dns
+if [[ $update -eq 1 ]]; then
+    lxc exec $container bash /tmp/wait4dns >/dev/null
+    lxc exec $container /usr/bin/apt-get update
+    lxc exec $container /usr/bin/apt-get -- --yes dist-upgrade
+    # move this stuff so it runs when no updates happen
+    lxc exec $container apt install -- --yes bc ca-certificates dmz-cursor-theme fonts-dejavu-core fonts-freefont-ttf gnome-menus lightdm ubuntu-session ubuntu-settings ubuntu-sounds unity unity-greeter unzip xkb-data xorg firefox
+    lxc exec $container apt purge -- -- yes bluez
+    # then something about XAUTHORITY and DISPLAY
+    # then firewall rules (need sudo bits too)
+    # then Xephyr
+
+
+fi
+lxc exec $container /bin/bash -- --login
+wait
+# we really mean ephemeral
+lxc delete -f $container
+# Tear is all down, firewall rules and xephyr process

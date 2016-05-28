@@ -1,0 +1,5 @@
+#!/bin/bash
+for ip in $(dig +short $1);
+do
+    dig +short -x $ip | sed -e 's/\.$//g'
+done

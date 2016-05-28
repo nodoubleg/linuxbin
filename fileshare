@@ -1,0 +1,5 @@
+#!/bin/bash
+# stupid script for SCPing $1 to a thing
+scp $1 gmason@private-fileshare.canonical.com:~/public_html
+echo -n "https://private-fileshare.canonical.com/~gmason/$1" | xsel -i --clipboard
+echo "URL: https://private-fileshare.canonical.com/~gmason/$1"
