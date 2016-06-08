@@ -6,7 +6,6 @@
 # defaults
 IMAGE="ubuntu:x"
 update=0
-pinghost=squid-proxy
 if [[ $# -eq 0 ]]; then
     echo "Using default image: $IMAGE"
 else
@@ -31,7 +30,7 @@ echo $container
 echo "Waiting for network..."
 while ! lxc exec $container ls /tmp/wait4dns > /dev/null 2>&1
 do
-    echo "while ! ping -c 1 $pinghost; do sleep 0.2; done 2>&1" | lxc file push - $container/tmp/wait4dns
+    echo "while ! ping -c 1 ${container}.lxd; do sleep 0.2; done 2>&1" | lxc file push - $container/tmp/wait4dns
 done
 if [[ $update -eq 1 ]]; then
     lxc exec $container /bin/bash /tmp/wait4dns >/dev/null
