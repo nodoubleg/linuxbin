@@ -12,8 +12,11 @@ then
 elif [ "$1" == "bvg" ]
 then
     vg="bvg"
+elif [ "$1" == "wvg" ]
+then
+    vg="wvg"
 else
-    echo "Usage: $0 <pbg|bvg>"
+    echo "Usage: $0 <pvg|wvg|bvg>"
     exit 1
 fi
 
@@ -30,7 +33,7 @@ w3m https://portal.admin.canonical.com/fail -dump | head -n1 | grep -qi victory
 }
 if getvictory
 then
-  victory='😄' 
+  victory='😄 💪🐸' 
 else
   echo 'FAIL! Fix this fail:'
   w3m https://portal.admin.canonical.com/fail -dump
@@ -67,6 +70,13 @@ EOD Checklist:
    - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
+WVG="
+EOD Checklist:
+ - WVG 
+   - Incoming RT queue: 
+   - Nagios/Maintenance Work: 
+ - Portal Fail Page: ${victory}
+ - RQ items: "
 BVG="
 EOD Checklist:
  - BVG 
@@ -90,6 +100,9 @@ echo ''
 if [ "$vg" == "pvg" ]
 then
 	echo "$PVG" >> $tmpfile
+elif [ "$vg" == "wvg" ]
+then
+	echo "$WVG" >> $tmpfile
 elif [ "$vg" == "bvg" ]
 then
 	echo "$BVG" >> $tmpfile
