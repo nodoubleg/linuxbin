@@ -33,8 +33,9 @@ do
     # we are spamming the host for dhcp requests, because trusty can't resolve itself normally.
     echo "while ! ping -c 1 ${container}.lxd; do dhclient eth0; done 2>&1" | lxc file push - $container/tmp/wait4dns
 done
+lxc exec $container /bin/bash /tmp/wait4dns >/dev/null
+
 if [[ $update -eq 1 ]]; then
-    lxc exec $container /bin/bash /tmp/wait4dns >/dev/null
     lxc exec $container /usr/bin/apt-get update
     lxc exec $container /usr/bin/apt-get -- --yes dist-upgrade
 fi
