@@ -5,6 +5,7 @@
 #rcpt='whiskey-reports@greenteam.canonical.com'
 #rcpt='tango-reports@greenteam.canonical.com'
 rcpt='foxtrot-reports@greenteam.canonical.com'
+lxc='kvm0:sup-mail'
 
 if [ "$1" == "pvg" ]
 then
@@ -40,6 +41,14 @@ else
   w3m https://portal.admin.canonical.com/fail -dump_source | gunzip -c | awk -F '"' '/target="_blank">[C,U]/{print $2}'
   exit 1
 fi  
+
+# gross hack, should fix this.
+# put the email header in for sup
+echo "To: $rcpt
+From: Greg Mason <greg.mason@canonical.com>
+Subject: $subject" >> $tmpfile
+echo >> $tmpfile
+echo >> $tmpfile
 
 # Let's scrape some stuff out of myday.
 myday=$(w3m https://portal.admin.canonical.com/myday -dump_source | gunzip -c)
@@ -110,12 +119,17 @@ fi
 echo "$myday" | grep 'Work time logged in RT' -A4 >> $tmpfile
 
 # Email time! finally! woo!
-#kmail -s "$subject" --body "`cat $tmpfile`" $rcpt
-cat $tmpfile | xsel -i --clipboard
+lxc file push $tmpfile $lxc/tmp/eod
+
 echo
-echo "body is just in clipboard. get a better email client!"
-echo 
-sylpheed --compose $rcpt "mailto:$rcpt?subject=$subject"
+echo "eod is in /tmp/eod in lxc."
+echo "c <enter>"
+echo "GG :read /tmp/eod"
+echo
+
+#lxc exec $lxc -- su - $USER -c "sup-mail -c $rcpt -j $subject"
+#sylpheed --compose $rcpt "mailto:$rcpt?subject=$subject"
+
 
 
 
