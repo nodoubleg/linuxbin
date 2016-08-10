@@ -28,10 +28,18 @@ fi
 container=$(lxc launch -e $IMAGE -p default -p docker | awk /Starting/'{print $2}')
 echo $container
 echo "Waiting for network..."
-while ! lxc exec $container ls /tmp/wait4dns > /dev/null 2>&1
+# first check that the guest is all the way up.
+while true
 do
+    sleep 0.25
+    lxc exec $container ls /etc/ssh/ssh_host_rsa_key > /dev/null 2>&1 && break
+done
+
+while true;
+do 
+    lxc exec $container ls /tmp/wait4dns >/dev/null 2>&1 && break
     # we are spamming the host for dhcp requests, because trusty can't resolve itself normally.
-    echo "while ! ping -c 1 ${container}.lxd; do dhclient eth0; done 2>&1" | lxc file push - $container/tmp/wait4dns
+    echo "while true; do ping -c 1 ${container}.lxd && break || dhclient eth0; done 2>&1" | lxc file push - $container/tmp/wait4dns
 done
 lxc exec $container /bin/bash /tmp/wait4dns >/dev/null
 
