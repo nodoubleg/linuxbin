@@ -1,5 +1,5 @@
 #!/bin/bash
-POSTER='Michael%20Foley'
+POSTER='Greg%20Mason'
 SYNTAX=text
 # urlencode the content so special characters get through
 # from: http://stackoverflow.com/a/2236014
@@ -10,6 +10,7 @@ w3m https://pastebin.canonical.com -dump_extra -post \
   | sed -nr 's|W3m-current-url:(.*)|\1|p' \
   | tee /dev/stderr | xsel -b
 
+echo "URL is in clipboard."
 # If the above fails to print out a URL,
 # then you need to login manually to pastebin with w3m:
 #   w3m https://pastebin.canonical.com
