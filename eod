@@ -5,7 +5,7 @@
 #rcpt='whiskey-reports@greenteam.canonical.com'
 #rcpt='tango-reports@greenteam.canonical.com'
 rcpt='foxtrot-reports@greenteam.canonical.com'
-lxc='kvm0:sup-mail'
+lxc='kvm0:mail'
 
 if [ "$1" == "pvg" ]
 then
