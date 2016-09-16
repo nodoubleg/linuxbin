@@ -3,6 +3,12 @@
 # good for quick tests in clean environments
 # works best with a local ubuntu mirror.
 
+# usage: ephem <image> <optional:latest>
+# example to launch trusty without updates:
+#   ephem ubuntu:t
+# example to launch xenial with latest updates:
+#   ephem ubuntu:x latest
+
 # defaults
 IMAGE="ubuntu:x"
 update=0
@@ -32,6 +38,11 @@ echo "Waiting for network..."
 while true
 do
     sleep 0.25
+    # This doesn't exist until cloud-init is finished.
+    # This was the cleanest series-agnostic way I could find to determine if
+    # we're done booting.
+    # We have to wait here because otherwise /tmp/ is nuked while the instance
+    # finishes booting. Waiting also gives us a nice "root@$HOSTNAME" prompt.
     lxc exec $container ls /etc/ssh/ssh_host_rsa_key > /dev/null 2>&1 && break
 done
 

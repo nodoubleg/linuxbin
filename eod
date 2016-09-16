@@ -2,23 +2,25 @@
 # EOD automation for nodoubleg.
 # No need for markdown notes, as my notes on are *paper* !
 # So, we're just doing all this shit in bash, because https://www.youtube.com/watch?v=Qy-Y3HJNU_s
-#rcpt='whiskey-reports@greenteam.canonical.com'
-#rcpt='tango-reports@greenteam.canonical.com'
-rcpt='foxtrot-reports@greenteam.canonical.com'
+rcpt='bootstack-reports@greenteam.canonical.com'
 lxc='kvm0:mail'
 
 if [ "$1" == "pvg" ]
 then
-    vg="pvg" 
+        vg="pvg" 
 elif [ "$1" == "bvg" ]
 then
-    vg="bvg"
+        vg="bvg"
 elif [ "$1" == "wvg" ]
 then
-    vg="wvg"
+        vg="wvg"
+# Just a placeholder for now, for interrupt-protected squad thing in bootstack.
+elif [ "$1" == "projects" ]
+then
+        vg="projects"
 else
-    echo "Usage: $0 <pvg|wvg|bvg>"
-    exit 1
+        echo "Usage: $0 <pvg|bvg|wvg|bootstack>"
+        exit 1
 fi
 
 
@@ -34,13 +36,17 @@ w3m https://portal.admin.canonical.com/fail -dump | head -n1 | grep -qi victory
 }
 if getvictory
 then
-  victory='😄 💪🐸' 
+    victory='😄 💪🐸' 
 else
-  echo 'FAIL! Fix this fail:'
-  w3m https://portal.admin.canonical.com/fail -dump
-  w3m https://portal.admin.canonical.com/fail -dump_source | gunzip -c | awk -F '"' '/target="_blank">[C,U]/{print $2}'
-  exit 1
-fi  
+    echo 'FAIL! Fix this fail:'
+    w3m https://portal.admin.canonical.com/fail -dump
+    w3m https://portal.admin.canonical.com/fail -dump_source | gunzip -c | awk -F '"' '/target="_blank">[C,U]/{print $2}'
+    if [ -z $skipfail ]; then
+        exit 1
+    else
+        victory=💩🎆
+    fi
+fi
 
 # gross hack, should fix this.
 # put the email header in for sup
@@ -48,49 +54,65 @@ echo "To: $rcpt
 From: Greg Mason <greg.mason@canonical.com>
 Subject: $subject" >> $tmpfile
 echo >> $tmpfile
-echo >> $tmpfile
 
 # Let's scrape some stuff out of myday.
 myday=$(w3m https://portal.admin.canonical.com/myday -dump_source | gunzip -c)
 
 # Just defining template stuff here, because why not.
-SOD_MISC_INTERRUPTS='SOD/Misc stuff:
+SOD_MISC_INTERRUPTS='
+SOD/Misc stuff:
 ===============
  - 
- 
+
 Maintenance time:
 =================
- -  
- 
+ - 
+
 Humans/PD/interruptions:
-========================'
+========================
+
+'
 
 ALERTHEADER='PD Alerts:
 =========='
 
+# TODO: add logic for if bootstack.
+# TODO: eventually do SF ticket history stuff.
 TICKETHEADER='
+
+SF Tickets:
+===========
  
-Tickets:
-========'
+RT Tickets:
+===========
+
+'
 PVG="
 EOD Checklist:
  - PVG 
-   - Incoming RT queue: 
-   - Nagios/Maintenance Work: 
+     - Incoming RT queue:
+     - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
 WVG="
 EOD Checklist:
  - WVG 
-   - Incoming RT queue: 
-   - Nagios/Maintenance Work: 
+     - Incoming RT queue: 
+     - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
 BVG="
 EOD Checklist:
  - BVG 
-   - Incoming RT queue: n/a
-   - Nagios/Maintenance Work: 
+     - Incoming RT queue: n/a
+     - Nagios/Maintenance Work: 
+ - Portal Fail Page: ${victory}
+ - RQ items: "
+PROJECTS="
+EOD Checklist:
+ - Projects
+     - Incoming RT queue:
+     - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
  - RQ items: "
 
@@ -137,3 +159,5 @@ echo
 rm $tmpfile
 
 notify-send --urgency=CRITICAL -t 3600000 "DROP TOPICS!"
+hamster-cli stop
+hamster-cli start EOD
