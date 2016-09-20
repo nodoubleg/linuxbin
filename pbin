@@ -1,0 +1,5 @@
+#!/bin/bash
+tmpfile=$(mktemp)
+vi -c "set paste" $tmpfile
+cat $tmpfile | pb
+rm $tmpfile

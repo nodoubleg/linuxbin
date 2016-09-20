@@ -1,5 +1,24 @@
 #!/bin/bash
-POSTER='Greg%20Mason'
+
+rawurlencode() {
+  local string="${1}"
+  local strlen=${#string}
+  local encoded=""
+  local pos c o
+
+  for (( pos=0 ; pos<strlen ; pos++ )); do
+     c=${string:$pos:1}
+     case "$c" in
+        [-_.~a-zA-Z0-9] ) o="${c}" ;;
+        * )               printf -v o '%%%02x' "'$c"
+     esac
+     encoded+="${o}"
+  done
+  echo "${encoded}" 
+}
+
+MYNAME=$(getent passwd $USER | cut -d: -f5 | cut -d, -f1)
+POSTER=`rawurlencode "$MYNAME"`
 SYNTAX=text
 # urlencode the content so special characters get through
 # from: http://stackoverflow.com/a/2236014
@@ -15,5 +34,4 @@ echo "URL is in clipboard."
 # If the above fails to print out a URL,
 # then you need to login manually to pastebin with w3m:
 #   w3m https://pastebin.canonical.com
-# and possibly actually paste something using that.
 # TODO: catch that failure and print a message to stderr
