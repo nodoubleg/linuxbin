@@ -1,0 +1,23 @@
+#!/usr/bin/python
+# A feeble attempt at a browser-like search capability for lastpass.
+
+# 0. config
+#  - search string
+#  - start lpass agent? #default to yes
+#  - lpass timeout #default to 5 min.
+#  - other lpass options to pass through?
+#  - smart search: # maybe these should just be commandline switches.
+#    - id: to show item title and contents.
+#    - title: to search in only title
+#    - body: to search only in body.
+
+
+# 1. dump everything into dicts/arrays/wtfe
+# pseudo:
+# test lpass for auth. take through "lpass login" if missing with sane lpass timeout.
+# item_list = lpass ls #make this key-value, with item id as index
+# item_contents = lpass show all the things # key-value, with item id as index still.
+
+# 2. search that crap. and print it. nicely.
+
+print("not done yet")
