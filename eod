@@ -2,8 +2,8 @@
 # EOD automation for nodoubleg.
 # No need for markdown notes, as my notes on are *paper* !
 # So, we're just doing all this shit in bash, because https://www.youtube.com/watch?v=Qy-Y3HJNU_s
-rcpt='bootstack-reports@greenteam.canonical.com'
-lxc='kvm0:mail'
+rcpt='bootstack-cre-reports@greenteam.canonical.com'
+lxc='mail'
 
 if [ "$1" == "pvg" ]
 then
@@ -93,7 +93,10 @@ EOD Checklist:
      - Incoming RT queue:
      - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
- - RQ items: "
+ - RQ items: 
+ - Clicktime time: 
+
+#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
 WVG="
 EOD Checklist:
  - WVG 
@@ -107,14 +110,21 @@ EOD Checklist:
      - Incoming RT queue: n/a
      - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
- - RQ items: "
+ - RQ items: 
+ - Clicktime time: 
+
+#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
 PROJECTS="
 EOD Checklist:
  - Projects
      - Incoming RT queue:
      - Nagios/Maintenance Work: 
  - Portal Fail Page: ${victory}
- - RQ items: "
+ - RQ items: 
+ - Clicktime time: 
+
+#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
+
 
 # Assemble the body.
 echo "$SOD_MISC_INTERRUPTS" >> $tmpfile

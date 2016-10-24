@@ -1,7 +1,7 @@
 #!/bin/bash
-#watch -c -n 3600 lxc exec kvm0:mail su gmason ~/agenda.sh | cat
+#watch -c -n 3600 lxc exec mail su gmason ~/agenda.sh | cat
 mystart=$(date --date='TZ="America/Detroit" today 00:00' +%Y-%m-%dT%H:%M%z)
 myend=$(date --date='TZ="America/Detroit" today 23:59' +%Y-%m-%dT%H:%M%z)
 width=$(expr `tput cols` - 20)
-bashwatch 3600 "lxc exec kvm0:mail -- su gmason -c \"gcalcli agenda $mystart $myend --detail_length --detail_description_width $width --military\""
+bashwatch 3600 "lxc exec mail -- su gmason -c \"gcalcli agenda $mystart $myend --detail_length --detail_description_width $width --military\""
 
