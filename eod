@@ -95,8 +95,7 @@ EOD Checklist:
  - Portal Fail Page: ${victory}
  - RQ items: 
  - Clicktime time: 
-
-#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
+"
 WVG="
 EOD Checklist:
  - WVG 
@@ -112,8 +111,7 @@ EOD Checklist:
  - Portal Fail Page: ${victory}
  - RQ items: 
  - Clicktime time: 
-
-#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
+"
 PROJECTS="
 EOD Checklist:
  - Projects
@@ -122,9 +120,7 @@ EOD Checklist:
  - Portal Fail Page: ${victory}
  - RQ items: 
  - Clicktime time: 
-
-#vim: sw=2 ts=2 et ai textwidth=78 syntax=markdown"
-
+"
 
 # Assemble the body.
 echo "$SOD_MISC_INTERRUPTS" >> $tmpfile
@@ -135,7 +131,8 @@ echo "$ALERTHEADER" >> $tmpfile
 ssh gmason@bip.nodoubleg.com 'sudo -u bip bash /home/bip/todays_alerts.sh' >> $tmpfile
 echo "$TICKETHEADER" >> $tmpfile
 # get list of all ticket titles.
-echo "$myday" | grep 'href="https://rt' | awk -F '<|>' '{print $5}' >> $tmpfile
+grep 'href="https://rt' <<<$myday | sed -e 's/<\|>/\n/g' | grep -A99 'https://rt' | grep ' - ' >> $tmpfile
+
 #TODO: add logic by fetching {W,P,B}VG status from Dashboard.
 echo ''
 if [ "$vg" == "pvg" ]
@@ -148,15 +145,19 @@ elif [ "$vg" == "bvg" ]
 then
 	echo "$BVG" >> $tmpfile
 fi
-echo "$myday" | grep 'Work time logged in RT' -A4 >> $tmpfile
+
+# dem RT stats.
+sed -e 's/<\|>/\n/g' <<<$myday | grep 'Work time logged in RT' |  sed -e 's/\*/\n\*/g' >> $tmpfile
 
 # Email time! finally! woo!
 lxc file push $tmpfile $lxc/tmp/eod
 
 echo
-echo "eod is in /tmp/eod in lxc."
-echo "c <enter>"
-echo "GG :read /tmp/eod"
+echo "compose message with:"
+echo "c"
+echo "7,$d|6r /tmp/eod" | xsel -i --clipboard
+echo 'Paste this (in clipboard):'
+echo ":7,$d|6r /tmp/eod"
 echo
 
 #lxc exec $lxc -- su - $USER -c "sup-mail -c $rcpt -j $subject"

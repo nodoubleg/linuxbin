@@ -1,0 +1,9 @@
+#!/bin/bash
+# reliably shows hamster-time-tracker overview window
+# requires: wmctrl and hamster-time-tracker
+PATH=/usr/bin:$PATH
+hamster-time-tracker overview
+sleep 0.1
+windowpid=$(pgrep hamster-window)
+winid=$(wmctrl -l -p | awk /$windowpid/'{print $1}')
+wmctrl -i -a $winid

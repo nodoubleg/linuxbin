@@ -1,0 +1,6 @@
+#!/bin/zsh
+# makes https://xkcd.com/936/ compliant passphrases
+
+passphrase=$(sed -e 's/\ /-/g' <<<${$(shuf -n4 /usr/share/dict/words)//\'/})
+echo $passphrase
+xsel -i --clipboard <<<$passphrase
